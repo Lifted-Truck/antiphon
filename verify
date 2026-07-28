@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# verify — oracle dispatcher. The harness's only interface to project QC.
+# Usage: ./verify fast | full | report
+# Contract: exit 0 = green, nonzero = red. Writes .harness/last-verify.json.
+# Gates are never weakened to pass.
+set -uo pipefail
+
+TARGET="${1:-fast}"
+HARNESS_DIR=".harness"
+mkdir -p "$HARNESS_DIR"
+
+record() { # record <target> <exit_code>
+  local git_hash; git_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "no-git")
+  printf '{"target":"%s","exit":%d,"git":"%s","ts":"%s"}\n' \
+    "$1" "$2" "$git_hash" "$(date -u +%FT%TZ)" > "$HARNESS_DIR/last-verify.json"
+  rm -f "$HARNESS_DIR/dirty"
+  return "$2"
+}
+
+# --- leak gate (kit-core — DO NOT delete; keep self-contained) --------------
+# No machine-absolute home paths in tracked files: they bake the local username
+# and directory layout into the repo — and into any public remote (this repo IS
+# public). Use a ~/-relative path or an env var instead. Prose placeholders
+# (/Users/<user>/, /home/$USER/) are docs ABOUT the pattern, not leaks.
+# NB: git grep uses POSIX ERE — no \s, no \d. (A \s here silently matches
+# NOTHING; that is how the fleet scanner once shipped blind. Keep it ERE-safe.)
+# --untracked is load-bearing: git grep defaults to TRACKED files only, so a
+# brand-new file is invisible to the gate until it is staged. Running verify
+# before `git add` then passes, and CI fails after the commit lands — which is
+# exactly how the first version of this gate shipped its own leak. Untracked
+# but not-gitignored == about to be committed, so scan it.
+leak_gate() {
+  local hits
+  hits=$(git grep --untracked -nIE '/(Users|home)/[^/]+/' -- . ':(exclude)*leak_scan.py' 2>/dev/null \
+         | grep -vE '/(Users|home)/[<$@{%]' || true)
+  [ -z "$hits" ] && return 0
+  echo "verify: LEAK — machine-absolute path in a tracked file (use ~/ instead):" >&2
+  echo "$hits" | sed 's/^/    /' >&2
+  return 1
+}
+
+# --- D5: no wall-clock in the deterministic core ----------------------------
+# The runner may touch time; the core may not. Scheduling is in TRANSPORT time
+# (beats), which is why the core stays replayable. Directories are globbed so
+# the gate covers policies/ and emit/ the moment they exist — a gate that only
+# guards today's files silently stops guarding as the tree grows.
+no_wallclock_gate() {
+  local hits
+  hits=$(grep -rnE 'time\.time|datetime\.now|time\.monotonic|perf_counter' \
+         src/antiphon/core src/antiphon/policies src/antiphon/emit 2>/dev/null || true)
+  [ -z "$hits" ] && return 0
+  echo "verify: FAIL — wall-clock reference in the deterministic core (D5):" >&2
+  echo "$hits" | sed 's/^/    /' >&2
+  return 1
+}
+
+# --- D5: no unseeded randomness anywhere in src -----------------------------
+# Bare `random.` module calls are forbidden; policies receive a seeded
+# random.Random INSTANCE. The leading-char class excludes `self.random.…` and
+# `rng.random(…)` (attribute access on a seeded instance) while still catching
+# the bare module call.
+no_unseeded_random_gate() {
+  local hits
+  hits=$(grep -rnE '(^|[^.[:alnum:]_])random\.(random|randint|choice|shuffle|uniform)\(' \
+         src/antiphon 2>/dev/null || true)
+  [ -z "$hits" ] && return 0
+  echo "verify: FAIL — unseeded randomness (D5); use a seeded random.Random instance:" >&2
+  echo "$hits" | sed 's/^/    /' >&2
+  return 1
+}
+
+# --- D2: Tonality may be imported ONLY inside its adapter -------------------
+# The adapter is the isolation layer against upstream API churn; an import that
+# leaks past it re-couples the whole core to Tonality's surface.
+tonality_boundary_gate() {
+  local hits
+  hits=$(grep -rlnE '^[[:space:]]*(import tonality|from tonality)' src/antiphon 2>/dev/null \
+         | grep -v 'adapters/tonality_adapter.py' || true)
+  [ -z "$hits" ] && return 0
+  echo "verify: FAIL — Tonality imported outside its adapter (D2):" >&2
+  echo "$hits" | sed 's/^/    /' >&2
+  return 1
+}
+
+# --- zero-dep charter: the core imports stdlib only -------------------------
+# Adding a dependency is a human gate. Catching it here means the charter is
+# enforced by the oracle, not by anyone remembering to check.
+zero_dep_gate() {
+  if [ -f requirements.txt ] && [ -s requirements.txt ]; then
+    echo "verify: FAIL — requirements.txt is non-empty; core is zero-dep by charter." >&2
+    return 1
+  fi
+  return 0
+}
+
+fast() {
+  # ---- Layer-0: deterministic, seconds, CI-blocking. -----------------------
+  local ok=0
+  echo "== Layer-0 (deterministic, CI-blocking) =="
+  leak_gate                || ok=1   # privacy gate: kit-core, keep it first
+  no_wallclock_gate        || ok=1
+  no_unseeded_random_gate  || ok=1
+  tonality_boundary_gate   || ok=1
+  zero_dep_gate            || ok=1
+
+  # Behavior pins. Zero-dep on purpose: stdlib unittest, no pytest.
+  PYTHONPATH=src python3 -m unittest discover -s tests -t . -q || ok=1
+
+  [ "$ok" = "0" ] && echo "verify fast: green (passing != done)"
+  return "$ok"
+}
+
+full() {
+  fast || return $?
+  # ---- Layer-E: behavioral, measured, NON-BLOCKING. ------------------------
+  # Deliberately empty and honest: ANTIPHON's Layer-E is the REPLAY INVARIANT
+  # (log a live session's causal spine + params + seed; replay through Wend's
+  # voice stage; emissions must reproduce byte-for-byte). It cannot be written
+  # until Wend's HarmonicSpine schema is frozen — see ROADMAP Phase 1.
+  # An aspirational red gate here would train the reflex of ignoring red.
+  echo "== Layer-E (behavioral, measured) =="
+  echo "  NOT YET IMPLEMENTED — blocked on Wend's frozen HarmonicSpine schema."
+  echo "  Owed: replay invariant; bridge round-trip; poll->commit latency to traces/."
+  echo "verify full: green (Layer-E empty — see ROADMAP Phase 1)"
+  return 0
+}
+
+case "$TARGET" in
+  fast)   fast;  record fast  $? ;;
+  full)   full;  record full  $? ;;
+  report) cat "$HARNESS_DIR/last-verify.json" 2>/dev/null || { echo '{"target":null,"exit":null}'; exit 1; } ;;
+  *)      echo "usage: ./verify fast|full|report" >&2; exit 64 ;;
+esac

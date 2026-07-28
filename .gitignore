@@ -1,0 +1,12 @@
+.harness/
+.claude/settings.local.json
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+
+# Starter kit: superseded by ANTIPHON_STATUS.md (see DECISIONS D7). Kept on
+# disk for archaeology, deliberately untracked so its superseded offline design
+# cannot be mistaken for current truth by a future fresh-context session.
+antiphon-starter.zip

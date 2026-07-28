@@ -1,0 +1,120 @@
+{
+  "$comment": "Spin-up survey answers (autonomous/kit/README.md, 9 questions). PROVISIONAL until ratified by the human. Deterministic scaffolding runs FROM this file: change an answer, re-run scaffold, review the diff.",
+  "name": "antiphon",
+  "title": "ANTIPHON",
+  "one_line": "A quantized harmonic companion for Ableton Live: hear a live performance, derive a causal harmonic spine under theta/k hysteresis, emit complementary MIDI on the transport grid.",
+  "created": "2026-07-13",
+  "status": "provisional",
+  "scope_ruling": {
+    "decided": "2026-07-13",
+    "rule": "ANTIPHON_STATUS.md (2026-07-13) outranks antiphon-starter.zip wherever they disagree.",
+    "consequence": "Scaffolded the harness around the SURVIVING hysteresis kernel + its pinned tests only. The offline design in the starter zip (tonality_adapter, SUSTAIN/COUNTER/PEDAL policy stubs, AnalysisFrame/ComplementPlan contracts) is superseded by Wend's harmonize mode and was NOT resurrected."
+  },
+
+  "survey": {
+    "q1_what_is_it": {
+      "answer": "app",
+      "detail": "A live device/daemon for Ableton Live (Python core + AbleMCP bridge adapter, later an M4L midiin tap). Not a library; not an offline batch tool -- that is Wend's harmonize mode."
+    },
+    "q2_architecture_rung": {
+      "answer": "single-thread",
+      "asked": true,
+      "detail": "One resident agent; read-only subagents (Explore/verifier/critic) ad hoc. Chosen by the human, never defaulted. Escalate only when this rung is the demonstrated bottleneck (doctrine: right-size the architecture; Decision 8 -- burden of proof runs against escalation).",
+      "escalation_trigger": "A demonstrated bottleneck, e.g. live-regime verification (Layer-E latency/replay runs) becoming the pacing item -- that would earn rung 2 (thread + verifier), not a fleet."
+    },
+    "q3_domain_core": {
+      "answer": "The theta/k harmonic hysteresis kernel and all emission policy.",
+      "detail": "Hard exact logic an LLM must never own: interpretation-switching (hold incumbent until challenger clears margin theta for k consecutive frames), transport-grid scheduling, and note selection. Pure, deterministic, seeded; no wall-clock, no I/O in core.",
+      "boundary": "AI/deterministic boundary (D5): Claude agents build and review; they never perform. No AI/LLM call anywhere in the runtime path."
+    },
+    "q4_oracle_shape": {
+      "answer": "invariants-now, pinned-goldens-later",
+      "layer_0": [
+        "leak gate (no machine-absolute paths -- repo is PUBLIC)",
+        "no wall-clock in core/ or policies/ (grep gate)",
+        "no unseeded randomness anywhere in src/ (grep gate)",
+        "hysteresis behavior pinned by 6 unit tests (stdlib unittest, zero-dep)"
+      ],
+      "layer_e": [
+        "DEFERRED: replay invariant -- a logged live session's causal spine + params + seed, replayed through Wend's voice stage, must reproduce emissions byte-for-byte. The batch tool is the live device's oracle.",
+        "DEFERRED: bridge round-trip smoke test + poll-to-commit latency, measured to traces/, non-blocking."
+      ],
+      "ci_matrix": "single-version smoke (ubuntu-latest, python 3.x) running ./verify fast"
+    },
+    "q5_second_implementation": {
+      "answer": "no",
+      "detail": "No port-pin module. But the replay invariant makes Wend's offline voice stage a de-facto reference implementation to agree with -- that is an oracle relationship, not a second implementation."
+    },
+    "q6_consumers": {
+      "answer": "is-a-consumer",
+      "consumes": [
+        {
+          "provider": "Wend",
+          "surface": "frozen HarmonicSpine schema + pinned voice stage",
+          "policy": "Consume, don't fork. ANTIPHON produces spines with source=\"live\" conforming to the frozen version; it does not define its own contracts.",
+          "status": "BLOCKED -- spine schema not yet frozen; brief required before Phase 1."
+        },
+        {
+          "provider": "Tonality",
+          "surface": "analysis slices (key estimate, chord naming, voice-leading distance)",
+          "policy": "Pinned library import behind an adapter (D2). New oracle surface = provider-first PR to Tonality, linked consumer pin bump. Never shim locally.",
+          "status": "deferred to Phase 1+"
+        },
+        {
+          "provider": "AbleMCP bridge",
+          "surface": "clip read/write, transport state; later an M4L midiin tap",
+          "status": "Phase 1 -- assumption A1 (poll fidelity) unverified"
+        }
+      ],
+      "provides_to": []
+    },
+    "q7_parallel_audit_thread": {
+      "answer": "no",
+      "detail": "Not earned at this size. Consistent with the single-thread rung."
+    },
+    "q8_knowledge_loop_tags": [
+      "hysteresis",
+      "oracle-boundary",
+      "determinism-replay",
+      "live-regime",
+      "bridge-fidelity"
+    ],
+    "q9_lifespan_autonomy": {
+      "lifespan": "long-lived",
+      "autonomy_tier": "low",
+      "detail": "Human-in-the-loop; agents build and review, never perform. Musical judgment calls are documented and traced, never automated. Governance strictness: standard harness gates + append-only DECISIONS."
+    }
+  },
+
+  "harness": {
+    "verify": ["fast", "full", "report"],
+    "hooks": ["PreToolUse:destructive-deny", "PostToolUse:dirty-mark", "Stop:verify-gate", "SubagentStop:verify-gate"],
+    "agents": ["implementer", "verifier", "critic"],
+    "skills": ["provenance"],
+    "knowledge_loop": true,
+    "ci": ".github/workflows/ci.yml -- ./verify fast on push/PR"
+  },
+
+  "stack": {
+    "language": "python",
+    "min_version": "3.11",
+    "dependencies": [],
+    "dependency_policy": "Core stays zero-dep and framework-free (doctrine: pure cores; UI/IO/time in thin adapters). Tests use stdlib unittest. Adding any dependency is a human gate.",
+    "layout": "src/antiphon/{core,adapters,policies}, tests/, contracts/, traces/"
+  },
+
+  "protected_paths": [
+    "src/antiphon/core/hysteresis.py",
+    "tests/test_hysteresis.py",
+    "verify",
+    "DECISIONS.md",
+    ".claude/"
+  ],
+
+  "spin_up_conditions": {
+    "$comment": "From ANTIPHON_STATUS.md. Scaffolding the repo does NOT satisfy these -- musical feature work stays gated until all three hold.",
+    "1_wend_h2_passes": "unmet -- the falsifiable claim (harmonization clarifies hearing) must hold on Wend's fixture set first",
+    "2_live_regime_needed": "unmet -- requires an actual workflow blocked by batch (performing against it, not bouncing files)",
+    "3_quantization_ceiling_measured": "unmet -- bar-level works today; beat/sub-beat waits on tonality-core slice availability"
+  }
+}

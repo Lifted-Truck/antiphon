@@ -1,0 +1,33 @@
+# CI mirrors the local Stop hook: it runs the project's ONE oracle in the
+# cloud on every push/PR. Not new checks — the same ./verify, so green in CI
+# means green locally. `full` is not run here: ANTIPHON's Layer-E needs a live
+# Ableton set and a frozen Wend spine, neither of which exists on a runner.
+
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # leak_gate uses git grep; a shallow tree hides files
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      # No install step: the core is zero-dep by charter and the tests are
+      # stdlib unittest. If this ever needs a `pip install`, that is a charter
+      # change and a human gate, not a quiet CI edit.
+
+      - name: verify fast
+        run: |
+          chmod +x verify
+          ./verify fast
