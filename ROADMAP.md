@@ -112,8 +112,26 @@ Clip polling cannot hear an *unrecorded* live performance.
   alternates.
 
 *Resolved:* the starter zip was triaged and deleted (D10); its surviving design
-is in `docs/inherited-design.md`. Ecosystem-track registration in `autonomous`
-remains unrequested — it needs a session resident in that repo.
+is in `docs/inherited-design.md`.
+
+## Open exchanges
+
+| ID | To | Ask | Ball | Respond-by |
+|---|---|---|---|---|
+| `antiphon-001` | autonomous | List ANTIPHON in the Execution-project registry, marked deliberately dormant | provider | 2026-07-28 |
+
+`antiphon-001` is filed at `autonomous/integrations/antiphon/brief.md`
+(uncommitted — committing it there is a resident action). **Nothing here is
+blocked on it.** ANTIPHON is *already* in ecosystem scope via `registry.json`'s
+`synthetic-worlds` group rule, which covers immediate children and derives
+harness state at sweep time; the brief asks only for the separate discretionary
+ROADMAP listing, so that a green-but-inactive repo reads as *gated* rather than
+*abandoned*. A declined response is a fine outcome and settles the general
+question of whether dormant projects belong in that list.
+
+**Deliberately unfiled:** the Wend and Tonality briefs (Phase 1). Filing them
+now would put a ball in a provider's court for work that must not start until
+the spin-up conditions hold. Their absence is a decision, not an oversight.
 
 ## Non-goals
 
