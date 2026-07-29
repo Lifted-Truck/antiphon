@@ -64,19 +64,37 @@ checkable.
       Wend's `voice`; emissions must reproduce byte-for-byte
 - [ ] Scheduler: pure function of (transport position, window, config) — no
       sleeps in core; the runner owns timing
-- [ ] θ/k defaults tuned against real material and **traced** (A3: θ=0.10, k=2
-      are placeholders inherited from the starter kit, never validated)
+- [ ] Canonical note ordering `(start_beat, pitch, duration, velocity)` pinned
+      by a test — an unstable sort silently breaks replay hash equality
+      (`docs/inherited-design.md` § Windowing)
+- [ ] **The three hysteresis acceptance fixtures**
+      (`docs/inherited-design.md` § Hysteresis acceptance fixtures):
+      `unambiguous_diatonic` never switches · `ambiguity_pun` suppresses
+      flicker · `modulation` switches after **exactly k** frames. Generated
+      deterministically, committed as `.mid` **and** note-list JSON so tests
+      need no MIDI parser (zero-dep charter, D9).
+- [ ] θ/k defaults tuned against those fixtures and **traced** (A3: θ=0.10,
+      k=2 are placeholders inherited from the starter kit, never validated)
 
 **Acceptance:** a logged session replays byte-identically through Wend's voice
-stage on a second machine; A1 answered with measurements in `traces/`.
+stage on a second machine; A1 answered with measurements in `traces/`; the
+three fixtures behave as specified above.
 
-## Phase 2 — Live performance input (BLOCKED)
+## Phase 2 — Live performance input + the owed emission gates (BLOCKED)
 
 Clip polling cannot hear an *unrecorded* live performance.
 
 - [ ] Minimal M4L listener device (dumb tap: note events + transport stamp)
 - [ ] Beat-level / half-bar emission option
 - [ ] Latency budget documented and **measured** (Layer-E, non-blocking)
+- [ ] **Emission invariants P2–P5 gated in `./verify`**
+      (`docs/inherited-design.md` § Emission invariants). P1 is only partially
+      gated today (seeded-RNG, no replay hash) and P6 is fully gated; P2–P5 are
+      owed. **First resolve which side owns each:** P3 (register fence) and P4
+      (density ceiling) exist because a live performer is playing at the same
+      time, so they are ANTIPHON's; P2 (pitch legality) and P5 (voice-leading
+      bound) may belong to Wend's voice stage. Check before implementing — a
+      local copy of a provider's invariant is the fork D7 forbids.
 
 ## Phase 3 — Surface & policy expansion (BLOCKED)
 
@@ -90,11 +108,12 @@ Clip polling cannot hear an *unrecorded* live performance.
 ## Open questions (blocking — ask the human)
 
 - **Ratify the manifest?** (Phase 0 gate above.)
-- **Is `antiphon-starter.zip` safe to delete** once its surviving content is
-  ported? Currently gitignored, kept on disk for archaeology. Deleting files is
-  a human gate.
 - **Does the working title stick?** README still records OBBLIGATO / DESCANT as
   alternates.
+
+*Resolved:* the starter zip was triaged and deleted (D10); its surviving design
+is in `docs/inherited-design.md`. Ecosystem-track registration in `autonomous`
+remains unrequested — it needs a session resident in that repo.
 
 ## Non-goals
 

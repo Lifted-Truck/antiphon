@@ -130,3 +130,40 @@ lets CI skip an install step entirely.
 **Falsifier:** If Phase 1's replay harness genuinely needs a library that
 stdlib cannot cover (e.g. a MIDI or schema-validation package), that is a human
 gate and an appended decision — not a quiet `pip install`.
+
+## D10 — Starter-kit triage completed; `antiphon-starter.zip` deleted
+**Date:** 2026-07-13 · **Decided by:** human, conditioned on triage being
+complete. Cites and completes **D7**.
+
+**Decision:** The starter kit was fully triaged and the zip deleted. Surviving
+design content that existed in no other place is captured in
+`docs/inherited-design.md`, with the parts that are real acceptance criteria
+promoted into ROADMAP Phases 1–2.
+
+**What D7 missed.** D7 accounted for the *superseded* stubs but was silent on
+five files, all of which carried live-regime-relevant design not covered by
+Wend:
+- `policies/base.py` — emission invariants **P1–P6**. Only P6 (and P1
+  partially) is gated today; **P2–P5 are owed.** P3 (register fence) and P4
+  (density ceiling) are ANTIPHON's by nature — they exist because a live
+  performer is playing simultaneously, which Wend's batch mode never faces.
+- `tests/fixtures/README.md` — the three acceptance fixtures for the *surviving*
+  θ/k kernel, including the exact claim "`modulation` switches after exactly k
+  frames."
+- `adapters/live_bridge.py` — the four-call bridge surface and the
+  everything-crossing-this-boundary-is-beats rule. D7 asserted this sketch
+  survived but nothing in the repo actually captured it.
+- `core/window.py` — the canonical sort `(start_beat, pitch, duration,
+  velocity)`, without which replay hash equality breaks silently.
+- `emit/clip_writer.py` — commit discipline: the runner asks a *pure* scheduler
+  when, the writer only writes, every plan appended to traces with its hash.
+
+**Rationale:** The zip was gitignored and therefore the only copy; deleting it
+before this triage would have destroyed design that no other document held. The
+general lesson — a triage that enumerates only what it recognizes will silently
+drop the remainder — is recorded as LIBRARY **L0003**.
+
+**Falsifier:** If a future session finds itself re-deriving a starter-kit
+decision that `docs/inherited-design.md` does not record, the triage was
+incomplete after all, and the omission should be appended here rather than
+quietly re-invented.

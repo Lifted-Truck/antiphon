@@ -6,7 +6,7 @@ __pycache__/
 venv/
 .DS_Store
 
-# Starter kit: superseded by ANTIPHON_STATUS.md (see DECISIONS D7). Kept on
-# disk for archaeology, deliberately untracked so its superseded offline design
-# cannot be mistaken for current truth by a future fresh-context session.
+# Starter kit: triaged and DELETED at spin-up (DECISIONS D7 + D10). Surviving
+# design lives in docs/inherited-design.md. The rule stays so a stray re-download
+# can never re-enter the tree and be mistaken for current truth.
 antiphon-starter.zip

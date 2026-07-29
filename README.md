@@ -121,6 +121,7 @@ byte-for-byte. *The batch tool is the live device's oracle.*
 | `DECISIONS.md` | Append-only record (D1–D7) |
 | `CLAUDE.md` | Agent charter; §Domain holds the invariants |
 | `ANTIPHON_STATUS.md` | Why this is on ice; what survived the Wend migration |
+| `docs/inherited-design.md` | Design salvaged from the deleted starter kit — owed invariants P2–P5, the θ/k acceptance fixtures, the bridge surface |
 | `project.manifest.json` | Spin-up survey answers (provisional until ratified) |
 | `INDEX.md` / `LIBRARY.md` | Knowledge loop: durable lessons |
 | `traces/` | One entry per merged change |

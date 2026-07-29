@@ -27,3 +27,4 @@ nothing — that is the normal outcome of most sessions.
 |---|---|---|
 | L0001 | `oracle-boundary` | A gate that has never fired is not known to be a gate — negative-test each one. |
 | L0002 | `determinism-replay` | When two docs disagree, ruling which one wins is a *decision*, not a merge. |
+| L0003 | `oracle-boundary` | A triage that lists what it recognizes silently drops the remainder — enumerate the source, not your memory of it. |
