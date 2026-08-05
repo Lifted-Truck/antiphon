@@ -4,7 +4,15 @@
   "title": "ANTIPHON",
   "one_line": "A quantized harmonic companion for Ableton Live: hear a live performance, derive a causal harmonic spine under theta/k hysteresis, emit complementary MIDI on the transport grid.",
   "created": "2026-07-13",
-  "status": "provisional",
+  "status": "ratified",
+  "ratified": "2026-07-14",
+
+  "$comment_dormant": "Read by governor/monitor.py (autonomous), per exchange antiphon-001. `review_by` is REQUIRED: dormancy EXPIRES, so this cannot become a permanent way to hide a rotting repo. Live -> DORMANT at INFO and suppresses the STALE activity warning; expired -> DORMANT-EXPIRED at WARN *and* STALE returns, louder than what it muted; omit `review_by` and the whole block is ignored, i.e. the incomplete form fails toward noise, never toward silence. Security/harness checks (UNGATED, NO-CI, LEAK, GAPS) still fire regardless -- a dormant repo can still be insecure.",
+  "dormant": {
+    "since": "2026-07-13",
+    "reason": "three spin-up conditions unmet by design (see spin_up_conditions; DECISIONS D7/D8/D10/D11)",
+    "review_by": "2026-10-13"
+  },
   "scope_ruling": {
     "decided": "2026-07-13",
     "rule": "ANTIPHON_STATUS.md (2026-07-13) outranks antiphon-starter.zip wherever they disagree.",

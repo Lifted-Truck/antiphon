@@ -19,8 +19,10 @@ is written to `traces/`.
 - [x] All five Layer-0 gates **negative-tested** (each proven to fire on a
       real violation; the seeded-`rng.choice` case proven not to false-positive)
 - [x] Charter, README, DECISIONS D1–D7, knowledge loop, `traces/`
-- [ ] **HUMAN GATE: ratify `project.manifest.json`** — the survey answers are
-      provisional until you say otherwise.
+- [x] **HUMAN GATE: ratify `project.manifest.json`** — ratified 2026-07-14.
+- [x] Dormancy declared machine-readably (`dormant` block, `review_by`
+      2026-10-13) and asserted locally by `tests/test_manifest_dormancy.py`
+      (D11, exchange `antiphon-001`)
 
 **Acceptance:** `./verify fast` green from day zero, honestly scoped; a fresh
 session can orient from README + ROADMAP + DECISIONS without reading code.
@@ -116,18 +118,25 @@ is in `docs/inherited-design.md`.
 
 ## Open exchanges
 
-| ID | To | Ask | Ball | Respond-by |
+| ID | To | Ask | Ball | State |
 |---|---|---|---|---|
-| `antiphon-001` | autonomous | List ANTIPHON in the Execution-project registry, marked deliberately dormant | provider | 2026-07-28 |
+| `antiphon-001` | autonomous | List ANTIPHON as deliberately dormant | — | **closed** 2026-07-14 |
 
-`antiphon-001` is filed at `autonomous/integrations/antiphon/brief.md`
-(uncommitted — committing it there is a resident action). **Nothing here is
-blocked on it.** ANTIPHON is *already* in ecosystem scope via `registry.json`'s
-`synthetic-worlds` group rule, which covers immediate children and derives
-harness state at sweep time; the brief asks only for the separate discretionary
-ROADMAP listing, so that a green-but-inactive repo reads as *gated* rather than
-*abandoned*. A declined response is a fine outcome and settles the general
-question of whether dormant projects belong in that list.
+**`antiphon-001` — accepted, and corrected.** autonomous landed the ROADMAP
+listing *and* pointed out that the listing alone does not solve the problem the
+brief described: `governor/monitor.py` does not read ROADMAP.md, so prose makes
+dormancy legible to humans while leaving the governor blind. The fix is the
+machine-readable `dormant` block, now in the manifest (**D11**), which is what
+this repo integrated. Confirmed at
+`autonomous/integrations/antiphon/ratification.md`.
+
+Also settled: no `registry.json` change was needed — the `synthetic-worlds`
+group rule already covers immediate children, and their sweep confirms
+ANTIPHON as `git: True · remote · verify: True`.
+
+**Next date that matters: 2026-10-13**, when dormancy expires and
+`tests/test_manifest_dormancy.py` goes red *by design*, forcing a
+re-ratification of the three spin-up conditions.
 
 **Deliberately unfiled:** the Wend and Tonality briefs (Phase 1). Filing them
 now would put a ball in a provider's court for work that must not start until

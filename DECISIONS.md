@@ -167,3 +167,49 @@ drop the remainder — is recorded as LIBRARY **L0003**.
 decision that `docs/inherited-design.md` does not record, the triage was
 incomplete after all, and the omission should be appended here rather than
 quietly re-invented.
+
+## D11 — Dormancy is declared machine-readably and **expires** on 2026-10-13
+**Date:** 2026-07-14 · **Decided by:** agent, integrating autonomous's response
+to exchange `antiphon-001`. Manifest ratified by the human the same day.
+
+**Decision:** `project.manifest.json` carries a `dormant` block —
+`since: 2026-07-13`, `review_by: 2026-10-13` — read by autonomous's
+`governor/monitor.py`. `tests/test_manifest_dormancy.py` asserts the shape
+locally and **goes red on the review date**.
+
+**Rationale — what the brief got wrong.** `antiphon-001` argued that a green
+repo with no commits is indistinguishable from an abandoned one *to a governor
+reading activity signals*, and then asked for a ROADMAP prose listing. Monitor
+does not read ROADMAP.md. The listing makes the dormancy legible to humans and
+leaves the governor exactly as blind — autonomous's phrasing, which is
+accurate: *"you asked for the half that doesn't fix it."* The machine-readable
+field is the half that fixes it. Verified against the implementation before
+adopting: `monitor.py:99-121, 167-184` and `governor/test_monitor.py`.
+
+**Why it expires.** A permanent "ignore me" flag is precisely how an abandoned
+repo hides from a health sweep. So: live → `DORMANT` (INFO), suppresses the
+`STALE` activity warning; expired → `DORMANT-EXPIRED` (WARN) **and** `STALE`
+returns — the expiry is louder than what it muted; `review_by` omitted → the
+whole block is ignored, so the incomplete form fails toward noise rather than
+silence. Security and harness checks (`UNGATED`, `NO-CI`, `LEAK`, `GAPS`) fire
+regardless: a dormant repo can still be insecure.
+
+**Defending 2026-10-13.** It is a *review* cadence, not a prediction of when
+ANTIPHON wakes — which is unknowable from here, since it depends on Wend H2 and
+on a live-regime need that may never materialize. Three months is short enough
+that a genuinely-abandoned ANTIPHON surfaces within a quarter, and long enough
+not to manufacture quarterly busywork on a project that is *supposed* to be
+quiet. Without the field, ANTIPHON would have tripped `STALE` on **2026-08-12**
+and joined 21 genuinely-stale repos as an indistinguishable WARN.
+
+**The local test is deliberately time-dependent.** It reads the clock and will
+go red with no diff on the review date. That is the mechanism, not a defect:
+it forces re-ratification here rather than delegating the deadline to a fleet
+sweep this repo does not run. The no-wall-clock invariant covers `core/`,
+`policies/`, and `emit/` — the replayable runtime — and does not cover tests.
+
+**Falsifier:** If the review date arrives and re-ratification is rubber-stamped
+by bumping the date without re-examining the three spin-up conditions, the
+expiry has become the permanent mute it was designed to prevent, and the
+mechanism is not working. Re-ratification is an appended entry here, never an
+edit to silence a gate.

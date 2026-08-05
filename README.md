@@ -3,7 +3,10 @@
 *Call-and-response. A quantized harmonic companion for Ableton Live.*
 
 **Status: scaffolding only — not yet a runnable device.**
-*Last verified current: 2026-07-13.*
+**Dormant by design** — declared in `project.manifest.json` and read by the
+ecosystem governor; next review **2026-10-13**, when the declaration expires
+and `./verify` goes red until someone re-ratifies it (D11).
+*Last verified current: 2026-07-14.*
 
 ANTIPHON hears a live MIDI performance on a source track, derives a **causal**
 harmonic interpretation of it under θ/k hysteresis, and emits complementary
