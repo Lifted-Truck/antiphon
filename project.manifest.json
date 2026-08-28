@@ -6,7 +6,6 @@
   "created": "2026-07-13",
   "status": "ratified",
   "ratified": "2026-07-14",
-
   "$comment_dormant": "Read by governor/monitor.py (autonomous), per exchange antiphon-001. `review_by` is REQUIRED: dormancy EXPIRES, so this cannot become a permanent way to hide a rotting repo. Live -> DORMANT at INFO and suppresses the STALE activity warning; expired -> DORMANT-EXPIRED at WARN *and* STALE returns, louder than what it muted; omit `review_by` and the whole block is ignored, i.e. the incomplete form fails toward noise, never toward silence. Security/harness checks (UNGATED, NO-CI, LEAK, GAPS) still fire regardless -- a dormant repo can still be insecure.",
   "dormant": {
     "since": "2026-07-13",
@@ -18,7 +17,6 @@
     "rule": "ANTIPHON_STATUS.md (2026-07-13) outranks antiphon-starter.zip wherever they disagree.",
     "consequence": "Scaffolded the harness around the SURVIVING hysteresis kernel + its pinned tests only. The offline design in the starter zip (tonality_adapter, SUSTAIN/COUNTER/PEDAL policy stubs, AnalysisFrame/ComplementPlan contracts) is superseded by Wend's harmonize mode and was NOT resurrected."
   },
-
   "survey": {
     "q1_what_is_it": {
       "answer": "app",
@@ -93,16 +91,29 @@
       "detail": "Human-in-the-loop; agents build and review, never perform. Musical judgment calls are documented and traced, never automated. Governance strictness: standard harness gates + append-only DECISIONS."
     }
   },
-
   "harness": {
-    "verify": ["fast", "full", "report"],
-    "hooks": ["PreToolUse:destructive-deny", "PostToolUse:dirty-mark", "Stop:verify-gate", "SubagentStop:verify-gate"],
-    "agents": ["implementer", "verifier", "critic"],
-    "skills": ["provenance"],
+    "verify": [
+      "fast",
+      "full",
+      "report"
+    ],
+    "hooks": [
+      "PreToolUse:destructive-deny",
+      "PostToolUse:dirty-mark",
+      "Stop:verify-gate",
+      "SubagentStop:verify-gate"
+    ],
+    "agents": [
+      "implementer",
+      "verifier",
+      "critic"
+    ],
+    "skills": [
+      "provenance"
+    ],
     "knowledge_loop": true,
     "ci": ".github/workflows/ci.yml -- ./verify fast on push/PR"
   },
-
   "stack": {
     "language": "python",
     "min_version": "3.11",
@@ -110,7 +121,6 @@
     "dependency_policy": "Core stays zero-dep and framework-free (doctrine: pure cores; UI/IO/time in thin adapters). Tests use stdlib unittest. Adding any dependency is a human gate.",
     "layout": "src/antiphon/{core,adapters,policies}, tests/, contracts/, traces/"
   },
-
   "protected_paths": [
     "src/antiphon/core/hysteresis.py",
     "tests/test_hysteresis.py",
@@ -118,11 +128,11 @@
     "DECISIONS.md",
     ".claude/"
   ],
-
   "spin_up_conditions": {
     "$comment": "From ANTIPHON_STATUS.md. Scaffolding the repo does NOT satisfy these -- musical feature work stays gated until all three hold.",
     "1_wend_h2_passes": "unmet -- the falsifiable claim (harmonization clarifies hearing) must hold on Wend's fixture set first",
     "2_live_regime_needed": "unmet -- requires an actual workflow blocked by batch (performing against it, not bouncing files)",
     "3_quantization_ceiling_measured": "unmet -- bar-level works today; beat/sub-beat waits on tonality-core slice availability"
-  }
+  },
+  "kit_version": "2.5.0"
 }

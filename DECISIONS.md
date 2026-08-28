@@ -213,3 +213,50 @@ by bumping the date without re-examining the three spin-up conditions, the
 expiry has become the permanent mute it was designed to prevent, and the
 mechanism is not working. Re-ratification is an appended entry here, never an
 edit to silence a gate.
+
+## D12 — `verify` sources kit-owned gates from vendored `.kit/` (kit 2.4.0)
+**Date:** 2026-08-18 · **Decided by:** human (kit_sync.py retrofit); recorded
+here after the fact because `verify` is a protected path and had no record of
+why it stopped being self-contained.
+
+**Decision:** `record()` and `leak_gate()` are no longer defined inline in
+`./verify`. They are vendored into `.kit/kit-gates.sh`, sourced by `verify`,
+and checksummed against `.kit/MANIFEST` by a new `kit_integrity` gate. A
+missing `.kit/kit-gates.sh` is a hard exit, not a skip.
+
+**This strengthens the protected path; it does not weaken it.** Recording that
+explicitly, because the diff *looks* like a self-contained gate being replaced
+by an external dependency — the old inline version even carried a "DO NOT
+delete; keep self-contained" comment. What actually happened:
+
+- The vendored `leak_gate` detects **two** identity shapes: the POSIX
+  `/Users|home/<name>/` form this repo already caught, **and** the Windows
+  drive form, which the inline version missed entirely. Per the kit's own
+  notes, `leak_gate` had drifted into ten distinct implementations across the
+  fleet, nine missing the Windows pattern — while every one of those repos
+  declared a `kit_version`. ANTIPHON's inline copy was one of the nine. On a
+  public repo that is a real exposure, not a stylistic issue.
+- It adds a `.leakcheck-allow` allowlist (for docs that legitimately contain
+  the patterns) and concurrency handling so a parallel fleet probe cannot make
+  our verify go red on a file that no longer exists.
+- `kit_integrity` is honest about its own limits: it detects **drift**, not
+  tampering, since the check lives inside a file it checks. The authoritative
+  comparison is external (`kit_sync.py --check`).
+
+**Why vendored rather than sourced from the standards repo:** CI has no
+checkout of that repo, and a gate that cannot run in CI is not a gate.
+
+**Consequence — `.kit/` MUST be committed.** Vendoring only works if the files
+travel with the repo. This was verified, not assumed: a simulated CI checkout
+(tracked files at HEAD plus the modified `verify`, no `.kit/`) exits 1 with
+`.kit/kit-gates.sh missing`. Committed together in this change.
+
+**Do not hand-edit `.kit/`.** Local edits make `./verify` go red by design —
+the point of vendoring is that the file is byte-identical everywhere, so a repo
+that customises it has silently opted out of the policy it claims to carry.
+Updates come from `kit_sync.py`.
+
+**Falsifier:** If a future kit sync ever *removes* a detector this repo relied
+on, `kit_integrity` will happily pass — it verifies the file matches MANIFEST,
+not that MANIFEST is good. Gate coverage regressions must be caught upstream in
+the standards repo, not here.
